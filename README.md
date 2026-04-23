@@ -95,10 +95,11 @@ Drift is a demonstration project built for the Codex Creator Challenge. Data is 
 
 ## Author
 
-**[Your Name]** — M.S. Data Science, University of Arizona
+**Abhiram Varma Nandimandalam** — M.S. Data Science, University of Arizona
+Personal Website:https://abhiramvarma.vercel.app/
 
 ---
 
 ## License
 
-MIT
+Apache-2.0 license
