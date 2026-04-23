@@ -1,4 +1,4 @@
-# 🌍 Drift
+# 🌍 Drift — AI-Powered Location Intelligence
 
 ### What Life Actually Feels Like — Anywhere on Earth
 
