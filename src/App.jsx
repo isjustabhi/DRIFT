@@ -351,7 +351,6 @@ export default function DriftApp() {
       body: JSON.stringify({
         model: "gpt-4o",
         messages,
-        tools: [{ type: "web_search_preview" }],
       }),
     });
 
