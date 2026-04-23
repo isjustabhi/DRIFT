@@ -131,7 +131,7 @@ function vibeTone(score) {
 
   return {
     ring: "bg-rose-500",
-    text: "text-rose-700",
+    text: "text-red-300",
     label: "Proceed carefully",
   };
 }
@@ -168,16 +168,16 @@ function CityRadar({ city, comparisonCity, overlay = false }) {
     <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart data={data} outerRadius="70%">
-          <PolarGrid stroke="#D6D3D1" />
+          <PolarGrid stroke="#334155" />
           <PolarAngleAxis
             dataKey="subject"
-            tick={{ fill: "#78716C", fontSize: 12, fontFamily: '"Source Sans 3", sans-serif' }}
+            tick={{ fill: "#94A3B8", fontSize: 12, fontFamily: '"Source Sans 3", sans-serif' }}
           />
           <Radar
             name={city?.name || "City"}
             dataKey="primary"
-            stroke="#B4784C"
-            fill="rgba(180, 120, 76, 0.25)"
+            stroke="#818CF8"
+            fill="rgba(129, 140, 248, 0.2)"
             fillOpacity={1}
             strokeWidth={2}
           />
@@ -185,8 +185,8 @@ function CityRadar({ city, comparisonCity, overlay = false }) {
             <Radar
               name={comparisonCity.name}
               dataKey="secondary"
-              stroke="#6B8A7A"
-              fill="rgba(107, 138, 122, 0.2)"
+              stroke="#34D399"
+              fill="rgba(52, 211, 153, 0.15)"
               fillOpacity={1}
               strokeWidth={2}
             />
@@ -211,19 +211,19 @@ function ScoreBars({ firstCity, secondCity }) {
         <BarChart data={data} barCategoryGap={18}>
           <XAxis
             dataKey="category"
-            tick={{ fill: "#78716C", fontSize: 12, fontFamily: '"Source Sans 3", sans-serif' }}
+            tick={{ fill: "#94A3B8", fontSize: 12, fontFamily: '"Source Sans 3", sans-serif' }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             domain={[0, 100]}
-            tick={{ fill: "#78716C", fontSize: 12, fontFamily: '"Source Sans 3", sans-serif' }}
+            tick={{ fill: "#94A3B8", fontSize: 12, fontFamily: '"Source Sans 3", sans-serif' }}
             axisLine={false}
             tickLine={false}
           />
           <Tooltip />
-          <Bar dataKey={firstCity.name} fill="#B4784C" radius={[6, 6, 0, 0]} />
-          <Bar dataKey={secondCity.name} fill="#6B8A7A" radius={[6, 6, 0, 0]} />
+          <Bar dataKey={firstCity.name} fill="#818CF8" radius={[6, 6, 0, 0]} />
+          <Bar dataKey={secondCity.name} fill="#34D399" radius={[6, 6, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -232,10 +232,10 @@ function ScoreBars({ firstCity, secondCity }) {
 
 function DataCard({ card }) {
   return (
-    <div className="rounded-2xl border border-[#E7E5E4] bg-white p-4 shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-md">
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-md">
       <div className="mb-3 text-2xl">{card.icon}</div>
-      <div className="text-sm text-[#78716C]">{card.label}</div>
-      <div className="mt-1 text-lg font-semibold text-[#1C1917]">{card.value}</div>
+      <div className="text-sm text-slate-400">{card.label}</div>
+      <div className="mt-1 text-lg font-semibold text-white">{card.value}</div>
     </div>
   );
 }
@@ -244,18 +244,18 @@ function CompareColumn({ city }) {
   const tone = vibeTone(city.vibeScore);
 
   return (
-    <div className="rounded-[28px] border border-[#E7E5E4] bg-white/85 p-6 shadow-sm">
+    <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/5 backdrop-blur-xl">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2
-            className="text-3xl text-[#1C1917] sm:text-4xl"
+            className="text-3xl text-white sm:text-4xl"
             style={{ fontFamily: '"Playfair Display", serif' }}
           >
             {city.name} <span className="ml-1">{city.flag}</span>
           </h2>
-          <p className="mt-2 text-sm text-[#78716C]">{city.country}</p>
+          <p className="mt-2 text-sm text-slate-400">{city.country}</p>
         </div>
-        <div className={`rounded-full px-4 py-2 text-sm font-semibold ${tone.text} bg-[#FAFAF7]`}>
+        <div className={`rounded-full px-4 py-2 text-sm font-semibold ${tone.text} bg-white/5`}>
           Vibe {city.vibeScore}
         </div>
       </div>
@@ -281,7 +281,7 @@ export default function DriftApp() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [apiKey, setApiKey] = useState("");
+  const [apiKey, setApiKey] = useState(import.meta.env.VITE_OPENAI_API_KEY || "");
   const [compareQuery, setCompareQuery] = useState("");
   const [compareVerdict, setCompareVerdict] = useState("");
   const [showCompareInput, setShowCompareInput] = useState(false);
@@ -351,7 +351,6 @@ export default function DriftApp() {
       body: JSON.stringify({
         model: "gpt-4o",
         messages,
-        tools: [{ type: "web_search_preview" }],
       }),
     });
 
@@ -402,7 +401,7 @@ ${JSON.stringify(secondCity, null, 2)}`,
     }
 
     if (!apiKey.trim()) {
-      setError("Enter your OpenAI API key first.");
+      setError("OpenAI API key not found. Set VITE_OPENAI_API_KEY in your environment variables.");
       return;
     }
 
@@ -465,52 +464,54 @@ ${JSON.stringify(secondCity, null, 2)}`,
 
   return (
     <div
-      className="min-h-screen bg-[#FAFAF7] px-4 py-8 text-[#1C1917] sm:px-6 lg:px-8"
+      className="min-h-screen bg-[#08090E] px-4 py-8 text-[#E2E8F0] sm:px-6 lg:px-8"
       style={{ fontFamily: '"Source Sans 3", sans-serif' }}
     >
+      <style>{`
+        @keyframes gridPulse { 0%,100%{opacity:0.03} 50%{opacity:0.07} }
+        @keyframes glowOrb { 0%{transform:translate(-50%,-50%) scale(1);opacity:0.15} 50%{transform:translate(-50%,-50%) scale(1.3);opacity:0.25} 100%{transform:translate(-50%,-50%) scale(1);opacity:0.15} }
+        @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+        .grid-bg { background-image: linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px); background-size: 60px 60px; animation: gridPulse 4s ease-in-out infinite; }
+        .glow-orb { position:absolute; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(99,102,241,0.2) 0%, rgba(139,92,246,0.1) 30%, transparent 70%); animation: glowOrb 6s ease-in-out infinite; pointer-events:none; }
+        .shimmer-btn { background: linear-gradient(90deg, #6366F1 0%, #8B5CF6 30%, #A78BFA 50%, #8B5CF6 70%, #6366F1 100%); background-size: 200% 100%; animation: shimmer 3s linear infinite; }
+      `}</style>
       <div className="mx-auto max-w-6xl">
         {isLoading ? (
-          <div className="mb-8 flex items-center justify-center gap-3 rounded-2xl border border-[#E7E5E4] bg-white/80 px-5 py-4 text-[#1C1917] shadow-sm backdrop-blur-sm">
+          <div className="mb-8 flex items-center justify-center gap-3 rounded-2xl border border-indigo-500/20 bg-indigo-950/40 px-5 py-4 text-[#E2E8F0] shadow-lg shadow-indigo-500/5 backdrop-blur-xl">
             <span className="inline-block animate-spin text-2xl">🌍</span>
-            <span className="text-sm font-semibold tracking-[0.12em] text-[#78716C] uppercase">
-              Building your Drift report...
+            <span className="text-sm font-semibold tracking-[0.12em] text-indigo-300 uppercase">
+              Scanning global data streams...
             </span>
           </div>
         ) : null}
 
         {error ? (
-          <div className="mb-8 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="mb-8 rounded-2xl border border-red-500/30 bg-red-950/30 px-4 py-3 text-sm text-red-300 backdrop-blur-sm">
             {error}
           </div>
         ) : null}
 
         {currentView === "search" ? (
-          <section className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center text-center">
-            <div className="w-full max-w-3xl">
-              <div className="mb-5">
-                <label className="mb-2 block text-left text-sm font-semibold text-[#78716C]">
-                  OpenAI API Key
-                </label>
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(event) => setApiKey(event.target.value)}
-                  placeholder="sk-..."
-                  className="w-full rounded-2xl border border-[#E7E5E4] bg-white px-5 py-4 text-base text-[#1C1917] shadow-sm outline-none transition-all duration-200 ease-in-out placeholder:text-[#A8A29E] focus:border-[#B4784C] focus:ring-2 focus:ring-[#B4784C]/20"
-                />
+          <section className="relative flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center text-center overflow-hidden">
+            <div className="grid-bg absolute inset-0 pointer-events-none" />
+            <div className="glow-orb" style={{ top: '40%', left: '50%' }} />
+
+            <div className="relative w-full max-w-3xl z-10">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-950/40 px-4 py-1.5 text-xs font-semibold tracking-[0.15em] text-indigo-300 uppercase backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                AI-Powered Location Intelligence
               </div>
 
               <h1
-                className="text-5xl leading-tight sm:text-6xl"
+                className="text-5xl leading-tight sm:text-7xl bg-gradient-to-b from-white via-indigo-100 to-indigo-300/60 bg-clip-text text-transparent"
                 style={{ fontFamily: '"Playfair Display", serif' }}
               >
-                Where are you curious about?
+                Where are you<br />curious about?
               </h1>
 
-              <div className="mt-5 h-10 overflow-hidden text-xl text-[#B4784C] sm:text-2xl">
+              <div className="mt-5 h-10 overflow-hidden text-xl sm:text-2xl">
                 <span
-                  className={`inline-block transition-all duration-200 ease-in-out ${textVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
-                    }`}
+                  className={`inline-block bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent font-semibold transition-all duration-200 ease-in-out ${textVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
                 >
                   {rotatingCity}
                 </span>
@@ -525,14 +526,14 @@ ${JSON.stringify(secondCity, null, 2)}`,
                     if (event.key === "Enter") handleCitySearch(searchQuery);
                   }}
                   placeholder="Search any city..."
-                  className="flex-1 rounded-full border border-[#E7E5E4] bg-white px-6 py-5 text-lg text-[#1C1917] shadow-sm outline-none transition-all duration-200 ease-in-out placeholder:text-[#A8A29E] focus:border-[#B4784C] focus:ring-2 focus:ring-[#B4784C]/20"
+                  className="flex-1 rounded-full border border-white/10 bg-white/5 px-6 py-5 text-lg text-white shadow-lg shadow-indigo-500/5 outline-none backdrop-blur-xl transition-all duration-200 ease-in-out placeholder:text-slate-500 focus:border-indigo-500/50 focus:bg-white/10 focus:ring-2 focus:ring-indigo-500/20"
                 />
                 <button
                   type="button"
                   onClick={() => handleCitySearch(searchQuery)}
-                  className="rounded-full bg-[#1C1917] px-8 py-5 text-lg font-semibold text-white transition-all duration-200 ease-in-out hover:bg-[#2A2623]"
+                  className="shimmer-btn rounded-full px-8 py-5 text-lg font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all duration-200 ease-in-out hover:shadow-xl hover:shadow-indigo-500/30 hover:-translate-y-0.5"
                 >
-                  Search
+                  Explore
                 </button>
               </div>
 
@@ -545,12 +546,16 @@ ${JSON.stringify(secondCity, null, 2)}`,
                       setSearchQuery(chip);
                       handleCitySearch(chip);
                     }}
-                    className="rounded-full border border-[#D6D3D1] bg-white px-4 py-2 text-sm font-semibold text-[#1C1917] transition-all duration-200 ease-in-out hover:bg-[#F1EEEA]"
+                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-300 backdrop-blur-sm transition-all duration-200 ease-in-out hover:border-indigo-500/30 hover:bg-indigo-500/10 hover:text-white"
                   >
                     {chip}
                   </button>
                 ))}
               </div>
+
+              <p className="mt-12 text-xs text-slate-600">
+                Data-Rich Immersive Field Tracker · Powered by GPT-4o
+              </p>
             </div>
           </section>
         ) : null}
@@ -560,36 +565,36 @@ ${JSON.stringify(secondCity, null, 2)}`,
             <button
               type="button"
               onClick={resetToSearch}
-              className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#E7E5E4] bg-white px-4 py-2 text-sm font-semibold text-[#1C1917] transition-all duration-200 ease-in-out hover:bg-[#F1EEEA]"
+              className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-300 backdrop-blur-sm transition-all duration-200 ease-in-out hover:bg-white/10 hover:text-white"
             >
               <span>←</span>
               <span>Back</span>
             </button>
 
-            <div className="rounded-[32px] border border-[#E7E5E4] bg-white/70 p-6 shadow-sm backdrop-blur-sm sm:p-8">
+            <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/5 backdrop-blur-xl sm:p-8">
               <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#78716C]">
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-indigo-400">
                     Life Report
                   </p>
                   <h1
-                    className="mt-3 text-5xl leading-tight sm:text-6xl"
+                    className="mt-3 text-5xl leading-tight sm:text-6xl bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent"
                     style={{ fontFamily: '"Playfair Display", serif' }}
                   >
-                    {cityData.name} <span>{cityData.flag}</span>
+                    {cityData.name} <span className="bg-none text-white">{cityData.flag}</span>
                   </h1>
-                  <p className="mt-4 text-lg text-[#78716C]">
+                  <p className="mt-4 text-lg text-slate-400">
                     {cityData.country} · {cityData.timezone} · Local time {timeNow}
                   </p>
                 </div>
 
-                <div className="rounded-[28px] border border-[#E7E5E4] bg-[#FAFAF7] p-5">
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#78716C]">
+                <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-indigo-400">
                     Vibe Score
                   </p>
                   <div className="mt-3 flex items-center gap-4">
-                    <div className={`h-5 w-5 rounded-full ${vibe?.ring}`} />
-                    <div className="text-4xl font-semibold text-[#1C1917]">{cityData.vibeScore}</div>
+                    <div className={`h-5 w-5 rounded-full ${vibe?.ring} shadow-lg`} />
+                    <div className="text-4xl font-semibold text-white">{cityData.vibeScore}</div>
                     <div className={`text-sm font-semibold ${vibe?.text}`}>{vibe?.label}</div>
                   </div>
                 </div>
@@ -597,14 +602,14 @@ ${JSON.stringify(secondCity, null, 2)}`,
             </div>
 
             <div className="mt-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-              <div className="rounded-[28px] border border-[#E7E5E4] bg-white p-6 shadow-sm">
+              <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/5 backdrop-blur-xl">
                 <h2
-                  className="text-3xl text-[#1C1917]"
+                  className="text-3xl text-white"
                   style={{ fontFamily: '"Playfair Display", serif' }}
                 >
                   Vibe Score
                 </h2>
-                <p className="mt-2 text-[#78716C]">
+                <p className="mt-2 text-slate-400">
                   A quick read on the city’s daily balance of friction, pleasure, and livability.
                 </p>
                 <div className="mt-6">
@@ -612,9 +617,9 @@ ${JSON.stringify(secondCity, null, 2)}`,
                 </div>
               </div>
 
-              <div className="rounded-[28px] border border-[#E7E5E4] bg-white p-6 shadow-sm">
+              <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/5 backdrop-blur-xl">
                 <h2
-                  className="text-3xl text-[#1C1917]"
+                  className="text-3xl text-white"
                   style={{ fontFamily: '"Playfair Display", serif' }}
                 >
                   Quick Stats
@@ -627,49 +632,49 @@ ${JSON.stringify(secondCity, null, 2)}`,
               </div>
             </div>
 
-            <div className="mt-10 rounded-[28px] border border-[#E7E5E4] bg-white p-6 shadow-sm sm:p-8">
+            <div className="mt-10 rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/5 backdrop-blur-xl sm:p-8">
               <h2
-                className="text-3xl text-[#1C1917]"
+                className="text-3xl text-white"
                 style={{ fontFamily: '"Playfair Display", serif' }}
               >
                 What Life Feels Like
               </h2>
               <div className="mt-6">
                 {primaryNarrative.map((paragraph, index) => (
-                  <p key={`narrative-${index}`} className="mb-5 text-lg leading-8 text-[#3F3A36]">
+                  <p key={`narrative-${index}`} className="mb-5 text-lg leading-8 text-slate-300">
                     {paragraph}
                   </p>
                 ))}
               </div>
             </div>
 
-            <div className="mt-10 rounded-[28px] border border-[#E7E5E4] bg-white p-6 shadow-sm sm:p-8">
+            <div className="mt-10 rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/5 backdrop-blur-xl sm:p-8">
               <button
                 type="button"
                 onClick={() => setIsDayExpanded((current) => !current)}
-                className="flex w-full items-center justify-between gap-4 text-left transition-all duration-200 ease-in-out hover:text-[#B4784C]"
+                className="flex w-full items-center justify-between gap-4 text-left transition-all duration-200 ease-in-out hover:text-indigo-400"
               >
                 <div>
                   <h2
-                    className="text-3xl text-[#1C1917]"
+                    className="text-3xl text-white"
                     style={{ fontFamily: '"Playfair Display", serif' }}
                   >
                     A Typical Tuesday in {cityData.name}
                   </h2>
-                  <p className="mt-2 text-[#78716C]">Open the immersive version of everyday life.</p>
+                  <p className="mt-2 text-slate-400">Open the immersive version of everyday life.</p>
                 </div>
-                <span className="text-2xl text-[#78716C]">{isDayExpanded ? "−" : "+"}</span>
+                <span className="text-2xl text-slate-400">{isDayExpanded ? "−" : "+"}</span>
               </button>
 
               <div
                 className={`overflow-hidden transition-all duration-200 ease-in-out ${isDayExpanded ? "mt-6 max-h-[1200px] opacity-100" : "max-h-0 opacity-0"
                   }`}
               >
-                <div className="rounded-[24px] bg-[#F7F3EE] p-6">
+                <div className="rounded-[24px] bg-indigo-950/30 p-6">
                   {dayNarrative.map((paragraph, index) => (
                     <p
                       key={`day-story-${index}`}
-                      className="mb-5 text-[1.05rem] leading-8 text-[#2F2B28] last:mb-0"
+                      className="mb-5 text-[1.05rem] leading-8 text-slate-300 last:mb-0"
                     >
                       {paragraph}
                     </p>
@@ -678,23 +683,23 @@ ${JSON.stringify(secondCity, null, 2)}`,
               </div>
             </div>
 
-            <div className="mt-10 rounded-[28px] border border-[#E7E5E4] bg-white p-6 shadow-sm">
+            <div className="mt-10 rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/5 backdrop-blur-xl">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2
-                    className="text-3xl text-[#1C1917]"
+                    className="text-3xl text-white"
                     style={{ fontFamily: '"Playfair Display", serif' }}
                   >
                     Compare with another city
                   </h2>
-                  <p className="mt-2 text-[#78716C]">
+                  <p className="mt-2 text-slate-400">
                     Pull a second report and see how the tradeoffs stack up.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowCompareInput((current) => !current)}
-                  className="rounded-full bg-[#1C1917] px-5 py-3 text-sm font-semibold text-white transition-all duration-200 ease-in-out hover:bg-[#2A2623]"
+                  className="rounded-full bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition-all duration-200 ease-in-out hover:bg-indigo-700"
                 >
                   Compare with another city
                 </button>
@@ -710,12 +715,12 @@ ${JSON.stringify(secondCity, null, 2)}`,
                       if (event.key === "Enter") handleCompareSearch();
                     }}
                     placeholder="Search a second city..."
-                    className="flex-1 rounded-full border border-[#E7E5E4] bg-[#FAFAF7] px-5 py-4 outline-none transition-all duration-200 ease-in-out placeholder:text-[#A8A29E] focus:border-[#B4784C] focus:ring-2 focus:ring-[#B4784C]/20"
+                    className="flex-1 rounded-full border border-white/10 bg-white/5 px-5 py-4 outline-none transition-all duration-200 ease-in-out placeholder:text-slate-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                   />
                   <button
                     type="button"
                     onClick={handleCompareSearch}
-                    className="rounded-full border border-[#1C1917] px-6 py-4 font-semibold text-[#1C1917] transition-all duration-200 ease-in-out hover:bg-[#F1EEEA]"
+                    className="rounded-full border border-[#1C1917] px-6 py-4 font-semibold text-white transition-all duration-200 ease-in-out hover:bg-white/10"
                   >
                     Build comparison
                   </button>
@@ -730,7 +735,7 @@ ${JSON.stringify(secondCity, null, 2)}`,
             <button
               type="button"
               onClick={() => setCurrentView("report")}
-              className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#E7E5E4] bg-white px-4 py-2 text-sm font-semibold text-[#1C1917] transition-all duration-200 ease-in-out hover:bg-[#F1EEEA]"
+              className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 ease-in-out hover:bg-white/10"
             >
               <span>←</span>
               <span>Back to {cityData.name}</span>
@@ -741,23 +746,23 @@ ${JSON.stringify(secondCity, null, 2)}`,
               <CompareColumn city={compareCity} />
             </div>
 
-            <div className="mt-8 rounded-[28px] border border-[#E7E5E4] bg-white p-6 shadow-sm sm:p-8">
+            <div className="mt-8 rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/5 backdrop-blur-xl sm:p-8">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2
-                    className="text-3xl text-[#1C1917]"
+                    className="text-3xl text-white"
                     style={{ fontFamily: '"Playfair Display", serif' }}
                   >
                     Side-by-side tradeoffs
                   </h2>
-                  <p className="mt-2 text-[#78716C]">
+                  <p className="mt-2 text-slate-400">
                     Use the overlays for shape, or bars for easier category-by-category reading.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setOverlayRadar((current) => !current)}
-                  className="rounded-full border border-[#1C1917] px-5 py-3 text-sm font-semibold text-[#1C1917] transition-all duration-200 ease-in-out hover:bg-[#F1EEEA]"
+                  className="rounded-full border border-[#1C1917] px-5 py-3 text-sm font-semibold text-white transition-all duration-200 ease-in-out hover:bg-white/10"
                 >
                   {overlayRadar ? "Show bar comparison" : "Show overlaid radar"}
                 </button>
@@ -765,27 +770,27 @@ ${JSON.stringify(secondCity, null, 2)}`,
 
               <div className="mt-6">
                 {overlayRadar ? (
-                  <div className="rounded-[24px] bg-[#FAFAF7] p-4 sm:p-6">
+                  <div className="rounded-[24px] bg-white/5 p-4 sm:p-6">
                     <CityRadar city={cityData} comparisonCity={compareCity} overlay />
                   </div>
                 ) : (
-                  <div className="rounded-[24px] bg-[#FAFAF7] p-4 sm:p-6">
+                  <div className="rounded-[24px] bg-white/5 p-4 sm:p-6">
                     <ScoreBars firstCity={cityData} secondCity={compareCity} />
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="mt-8 rounded-[28px] border border-[#E7E5E4] bg-white p-6 shadow-sm sm:p-8">
+            <div className="mt-8 rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/5 backdrop-blur-xl sm:p-8">
               <h2
-                className="text-3xl text-[#1C1917]"
+                className="text-3xl text-white"
                 style={{ fontFamily: '"Playfair Display", serif' }}
               >
                 Drift's verdict
               </h2>
               <div className="mt-6">
                 {formatNarrative(compareVerdict).map((paragraph, index) => (
-                  <p key={`verdict-${index}`} className="mb-5 text-lg leading-8 text-[#3F3A36]">
+                  <p key={`verdict-${index}`} className="mb-5 text-lg leading-8 text-slate-300">
                     {paragraph}
                   </p>
                 ))}
