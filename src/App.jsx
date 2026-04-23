@@ -59,7 +59,7 @@ const REPORT_SYSTEM_PROMPT = `You are Drift, a brutally honest location analyst.
   "narrative": "3-4 paragraphs about what life actually feels like. Be honest — mention downsides too. Talk about the pace of life, the people, the food scene, the cost reality, the weather patterns, the nightlife, the work culture. Write like a friend who lived there for 2 years.",
   "dayStory": "A vivid second-person narrative of a typical Tuesday. Start from waking up, include specific details like coffee prices, commute descriptions, lunch spots, afternoon activities, evening routine. Make it cinematic and immersive. 4-5 paragraphs."
 }
-Use current real-world data. Be specific with prices, distances, and details. Scores should reflect genuine quality of life metrics.`;
+Use current real-world data. Be specific with prices, distances, and details. Scores should reflect genuine quality of life metrics. CRITICAL: Your entire response must be a single valid JSON object. Use \\n for newlines inside string values. Do not include any text before or after the JSON.`;
 
 const COMPARE_SYSTEM_PROMPT = `You are Drift, a brutally honest location analyst. Compare two cities based on quality of life, cost reality, culture, logistics, and daily rhythm. Respond ONLY with valid JSON in this exact format:
 {
@@ -71,13 +71,36 @@ function safeJsonParse(raw) {
     throw new Error("The AI response was empty.");
   }
 
-  const cleaned = raw
+  let cleaned = raw
     .trim()
     .replace(/^```json\s*/i, "")
     .replace(/^```\s*/i, "")
     .replace(/\s*```$/, "");
 
-  return JSON.parse(cleaned);
+  // Fix unescaped control characters inside JSON string values
+  cleaned = cleaned.replace(/"(?:[^"\\]|\\.)*"/g, (match) => {
+    return match
+      .replace(/(?<!\\)\n/g, "\\n")
+      .replace(/(?<!\\)\r/g, "\\r")
+      .replace(/(?<!\\)\t/g, "\\t");
+  });
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    // Fallback: try to extract JSON object from the response
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const fallback = jsonMatch[0].replace(/"(?:[^"\\]|\\.)*"/g, (match) => {
+        return match
+          .replace(/(?<!\\)\n/g, "\\n")
+          .replace(/(?<!\\)\r/g, "\\r")
+          .replace(/(?<!\\)\t/g, "\\t");
+      });
+      return JSON.parse(fallback);
+    }
+    throw new Error("Could not parse the AI response. Please try again.");
+  }
 }
 
 function extractMessageContent(data) {
